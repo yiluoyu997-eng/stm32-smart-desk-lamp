@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Editors and operating systems
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Temporary and generated files
+tmp/
+temp/
+output/
+outputs/
+build/
+dist/
+*.log
+*.bak
+*.tmp
+*.zip
+*.7z
+*.rar
+
+# Coursework and office documents
+*.doc
+*.docx
+*.pdf
+*.ppt
+*.pptx
+*.xls
+*.xlsx
+
+# EDA backups and manufacturing outputs
+*.epro
+*.eprj
+*.PrjPcbStructure
+Gerber_*/
+BOM_*/
+PickAndPlace_*/
+
+# Superpowers execution scratch data
+.superpowers/
+
+# Internal planning records
+docs/superpowers/

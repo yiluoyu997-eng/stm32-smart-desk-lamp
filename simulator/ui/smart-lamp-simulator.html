@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="基于 STM32 的自适应智能台灯离线控制逻辑模拟器">
+  <title>智能台灯 · 图形模拟器</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23101728'/%3E%3Cpath d='M18 42h28l-6-22H24z' fill='%23ffd166'/%3E%3Cpath d='M32 42v10M22 54h20' stroke='%23f7f8ff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root{color-scheme:dark;--bg:#080b13;--panel:#111726;--panel2:#171f31;--line:#263149;--text:#eef3ff;--muted:#92a0b9;--amber:#ffd166;--cyan:#69d2ff;--red:#ff687c;--green:#62e6a7;--shadow:0 24px 70px rgba(0,0,0,.38)}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(circle at 48% -20%,#1b2846 0,#0b101c 35%,var(--bg) 70%);color:var(--text);font:16px/1.5 "Microsoft YaHei UI","Segoe UI",sans-serif}
+    button,input,select{font:inherit} button{cursor:pointer}.app{width:min(1420px,100%);margin:auto;padding:24px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}.brand h1{font-size:clamp(1.35rem,2.5vw,2rem);margin:0;font-weight:700;letter-spacing:.03em}.brand p{margin:3px 0 0;color:var(--muted);font-size:.9rem}.status-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.badge{padding:7px 11px;border-radius:999px;background:#182238;color:#c8d4e8;font-size:.82rem;border:1px solid #293650}.badge.on{background:rgba(98,230,167,.12);color:var(--green);border-color:rgba(98,230,167,.35)}.badge.warn{background:rgba(255,104,124,.12);color:#ff91a0;border-color:rgba(255,104,124,.35)}
+    .layout{display:grid;grid-template-columns:minmax(390px,1.25fr) minmax(330px,.9fr);gap:18px}.stage,.controls,.timeline{background:linear-gradient(155deg,rgba(23,31,49,.96),rgba(13,18,31,.98));border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}.stage{min-height:610px;padding:24px;display:flex;flex-direction:column;overflow:hidden;position:relative}.scene-title{display:flex;justify-content:space-between;align-items:flex-start;z-index:2}.eyebrow{color:var(--cyan);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase}.scene-title h2{margin:3px 0 0;font-size:1.1rem}.clock{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem}
+    .lamp-zone{position:relative;flex:1;min-height:390px;display:flex;align-items:center;justify-content:center}.ambient{position:absolute;inset:5% 4%;border-radius:50%;background:radial-gradient(circle,rgba(105,210,255,.08),transparent 66%);transition:.5s}.glow{position:absolute;width:390px;height:390px;border-radius:50%;background:radial-gradient(circle,rgba(255,209,102,var(--glow-alpha)) 0,rgba(255,188,66,calc(var(--glow-alpha)*.55)) 34%,transparent 70%);filter:blur(4px);transform:translateY(15px);transition:opacity .25s,background .25s}.lamp-emoji{font-size:190px;line-height:1;filter:drop-shadow(0 18px 35px rgba(0,0,0,.5));transform:rotate(2deg);z-index:1;user-select:none}.alarm-ring{position:absolute;width:270px;height:270px;border:2px solid rgba(255,209,102,.8);border-radius:50%;opacity:0;z-index:0}.alarm .alarm-ring{animation:ring 1.3s ease-out infinite}.alarm .lamp-emoji{animation:breathe 1s ease-in-out infinite alternate}@keyframes ring{0%{transform:scale(.72);opacity:.8}100%{transform:scale(1.3);opacity:0}}@keyframes breathe{to{filter:drop-shadow(0 0 45px rgba(255,209,102,.9));transform:scale(1.04) rotate(2deg)}}
+    .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;z-index:2}.metric{background:rgba(7,10,18,.55);border:1px solid #25314a;border-radius:16px;padding:13px}.metric span{display:block;color:var(--muted);font-size:.78rem}.metric strong{font-size:1.35rem;font-variant-numeric:tabular-nums}.meter{height:5px;background:#222b3f;border-radius:999px;margin-top:8px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff9f43,var(--amber));transition:width .28s}
+    .controls{padding:18px}.section{padding:15px 2px;border-bottom:1px solid var(--line)}.section:first-child{padding-top:2px}.section:last-child{border:0;padding-bottom:2px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.section h3{margin:0;font-size:.94rem}.value{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:700}.button-row{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #34415c;background:#1c263a;color:var(--text);padding:10px 13px;border-radius:12px;min-height:44px;transition:.18s}.btn:hover{background:#26324a}.btn.active,.btn.primary{background:var(--amber);border-color:var(--amber);color:#17120a;font-weight:700}.btn.danger.active{background:var(--red);border-color:var(--red);color:white}.btn.wide{flex:1}.field{margin-top:12px}.field label{display:flex;justify-content:space-between;margin-bottom:7px;color:#c9d3e7;font-size:.88rem}.field input[type=range]{width:100%;accent-color:var(--amber)}.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}.switch{position:relative;width:48px;height:27px}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;background:#303a50;border-radius:99px;transition:.2s}.switch span:after{content:"";position:absolute;width:21px;height:21px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked+span{background:var(--red)}.switch input:checked+span:after{transform:translateX(21px)}
+    .timeline{grid-column:1/-1;padding:18px 20px}.timeline-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px}.timeline h3{margin:0;font-size:1rem}.timeline small{color:var(--muted)}.log{display:grid;gap:7px;max-height:190px;overflow:auto;padding-right:5px}.log-row{display:grid;grid-template-columns:70px 130px 1fr auto;gap:12px;align-items:center;padding:9px 4px;border-bottom:1px solid rgba(38,49,73,.7);font-size:.88rem}.log-row:last-child{border:0}.log-time,.log-value{font-variant-numeric:tabular-nums;color:var(--muted)}.log-state{color:var(--cyan)}.empty{color:var(--muted);padding:14px 4px}.footer-note{color:var(--muted);font-size:.78rem;margin:13px 0 0}
+    @media(max-width:850px){.app{padding:14px}.layout{grid-template-columns:1fr}.stage{min-height:530px}.timeline{grid-column:auto}.topbar{align-items:flex-start}.status-strip{max-width:50%}.lamp-emoji{font-size:145px}.glow{width:310px;height:310px}.readouts{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}.log-row{grid-template-columns:56px 100px 1fr}.log-value{display:none}}
+    @media(max-width:520px){.topbar{display:block}.status-strip{max-width:none;justify-content:flex-start;margin-top:12px}.stage{padding:17px;min-height:500px}.scene-title{display:block}.clock{margin-top:5px}.button-row .btn{flex:1}.readouts{grid-template-columns:1fr 1fr}.metric strong{font-size:1.1rem}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><h1>智能台灯控制台</h1><p>离线逻辑模拟 · 所有时间均为虚拟时间</p></div>
+      <div class="status-strip" aria-live="polite"><span class="badge" id="powerBadge">软件关机</span><span class="badge" id="modeBadge">自动模式</span><span class="badge" id="faultBadge">传感器正常</span></div>
+    </header>
+
+    <div class="layout">
+      <section class="stage" aria-label="虚拟台灯">
+        <div class="scene-title"><div><span class="eyebrow">LIVE SIMULATION</span><h2 id="stateTitle">等待开机</h2></div><div class="clock">虚拟时间 <strong id="clock">00:00</strong></div></div>
+        <div class="lamp-zone" id="lamp"><div class="ambient"></div><div class="glow"></div><div class="alarm-ring"></div><div class="lamp-emoji" role="img" aria-label="虚拟台灯">💡</div></div>
+        <div class="readouts">
+          <div class="metric"><span>实际亮度</span><strong id="actualValue">0%</strong><div class="meter"><i id="actualMeter"></i></div></div>
+          <div class="metric"><span>目标亮度</span><strong id="targetValue">0%</strong><div class="meter"><i id="targetMeter"></i></div></div>
+          <div class="metric"><span>无人计时</span><strong id="vacancyValue">—</strong><div class="meter"><i id="vacancyMeter"></i></div></div>
+        </div>
+      </section>
+
+      <aside class="controls" aria-label="模拟控制">
+        <section class="section"><div class="section-head"><h3>电源与模式</h3></div><div class="button-row"><button class="btn primary wide" id="powerToggle">软件开机</button><button class="btn active" id="modeAuto">自动</button><button class="btn" id="modeManual">手动</button></div></section>
+        <section class="section"><div class="section-head"><h3>环境输入</h3><span class="value" id="luxValue">100 lux</span></div><div class="field"><label for="lux">桌面照度</label><input id="lux" type="range" min="0" max="600" value="100" step="10"></div><div class="field"><label for="presence">人员状态</label><select id="presence" class="btn" style="width:100%"><option value="present">有人</option><option value="absent">无人</option></select></div></section>
+        <section class="section"><div class="section-head"><h3>手动亮度</h3><span class="value" id="manualValue">50%</span></div><div class="field"><input id="manualBrightness" type="range" min="0" max="100" value="50" step="5"></div></section>
+        <section class="section"><div class="section-head"><h3>传感器故障</h3></div><div class="toggle"><span>BH1750 照度故障</span><label class="switch"><input id="bhFault" type="checkbox"><span></span></label></div><div class="toggle"><span>LD2410 雷达故障</span><label class="switch"><input id="radarFault" type="checkbox"><span></span></label></div></section>
+        <section class="section"><div class="button-row"><button class="btn wide" id="advance1">推进 1 秒</button><button class="btn wide" id="advance120">快进 120 秒</button></div><div class="button-row" style="margin-top:8px"><button class="btn wide" id="triggerAlarm">立即触发闹钟</button><button class="btn wide" id="reset">重置</button></div></section>
+      </aside>
+
+      <section class="timeline"><div class="timeline-header"><h3>事件记录</h3><small>最新事件显示在顶部</small></div><div class="log" id="eventLog" aria-live="polite"><div class="empty">操作右侧控件，观察台灯如何决策。</div></div><p class="footer-note">当前 Bmin=10%、明暗阈值=250/350 lux、无人延时=120 秒，均为软件测试值，实物阶段需要重新标定。</p></section>
+    </div>
+  </main>
+
+  <script>
+    const $=id=>document.getElementById(id);
+    const cfg={bmin:10,dark:250,bright:350,standby:10,delay:120,rate:20};
+    const state={time:0,powered:false,mode:'auto',lux:100,presence:'present',bhFault:false,radarFault:false,dark:true,target:0,actual:0,vacancyStart:null,alarm:false,alarmPhase:0,lastSummary:'',logs:[]};
+    let animTimer=null;
+    function clampTarget(v){return v===0?0:Math.max(cfg.bmin,Math.min(100,v))}
+    function autoBrightness(){return state.lux<100?100:state.lux<180?80:50}
+    function decide(){
+      if(state.alarm){state.target=state.alarmPhase?60:cfg.bmin;return '闹钟呼吸提醒'}
+      if(!state.powered){state.target=0;state.vacancyStart=null;return '软件关机'}
+      if(state.mode==='manual')return state.target===0?'手动关闭':'手动亮度保持';
+      if(state.bhFault)return '照度故障，冻结亮度';
+      if(state.lux>=cfg.bright)state.dark=false; else if(state.lux<=cfg.dark)state.dark=true;
+      if(!state.dark){state.target=0;state.vacancyStart=null;return '环境明亮，灯光关闭'}
+      if(state.radarFault)return '人员未知，保持当前灯光';
+      if(state.presence==='present'){state.target=clampTarget(autoBrightness());state.vacancyStart=null;return '暗处有人，自动补光'}
+      if(state.target===0&&state.actual===0){state.vacancyStart=null;return '暗处无人，保持关闭'}
+      if(state.vacancyStart===null)state.vacancyStart=state.time;
+      const elapsed=state.time-state.vacancyStart;
+      state.target=elapsed>=cfg.delay?0:cfg.standby;
+      return elapsed>=cfg.delay?'持续无人，平滑关闭':'人员离开，待机计时';
+    }
+    function stepBrightness(seconds){const max=cfg.rate*seconds;if(state.actual<state.target)state.actual=Math.min(state.target,state.actual+max);else state.actual=Math.max(state.target,state.actual-max)}
+    function advance(seconds,reason){state.time+=seconds;const title=decide();stepBrightness(seconds);record(reason||title);render(title)}
+    function record(text){const summary=`${text}|${state.mode}|${state.target}|${state.actual}|${state.alarm}`;if(summary===state.lastSummary)return;state.lastSummary=summary;state.logs.unshift({time:state.time,text,state:state.alarm?'闹钟':state.mode==='auto'?'自动':'手动',value:`目标 ${Math.round(state.target)}% · 实际 ${Math.round(state.actual)}%`});state.logs=state.logs.slice(0,12)}
+    function formatTime(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`}
+    function render(title=decide()){
+      const glow=Math.max(.03,state.actual/100*.8);$('lamp').style.setProperty('--glow-alpha',glow);$('lamp').classList.toggle('alarm',state.alarm);$('stateTitle').textContent=title;$('clock').textContent=formatTime(state.time);
+      $('actualValue').textContent=`${Math.round(state.actual)}%`;$('targetValue').textContent=`${Math.round(state.target)}%`;$('actualMeter').style.width=`${state.actual}%`;$('targetMeter').style.width=`${state.target}%`;
+      const vacancy=state.vacancyStart===null?'—':`${Math.min(cfg.delay,Math.round(state.time-state.vacancyStart))}s`;$('vacancyValue').textContent=vacancy;$('vacancyMeter').style.width=state.vacancyStart===null?'0%':`${Math.min(100,(state.time-state.vacancyStart)/cfg.delay*100)}%`;
+      $('powerBadge').textContent=state.powered?'电源开启':'软件关机';$('powerBadge').className=`badge ${state.powered?'on':''}`;$('modeBadge').textContent=state.mode==='auto'?'自动模式':'手动模式';$('modeBadge').className='badge on';
+      const faults=[state.bhFault?'BH1750':'',state.radarFault?'LD2410':''].filter(Boolean);$('faultBadge').textContent=faults.length?`${faults.join(' + ')} 故障`:'传感器正常';$('faultBadge').className=`badge ${faults.length?'warn':'on'}`;
+      $('powerToggle').textContent=state.powered?'软件关机':'软件开机';$('modeAuto').classList.toggle('active',state.mode==='auto');$('modeManual').classList.toggle('active',state.mode==='manual');
+      $('eventLog').innerHTML=state.logs.length?state.logs.map(x=>`<div class="log-row"><span class="log-time">${formatTime(x.time)}</span><span class="log-state">${x.state}</span><span>${x.text}</span><span class="log-value">${x.value}</span></div>`).join(''):'<div class="empty">操作右侧控件，观察台灯如何决策。</div>';
+    }
+    function stopAlarm(){if(!state.alarm)return;clearInterval(animTimer);state.alarm=false;state.alarmPhase=0;decide();record('按键停止闹钟，恢复原状态');render()}
+    $('powerToggle').onclick=()=>{if(state.alarm){stopAlarm();return}state.powered=!state.powered;advance(1,state.powered?'用户软件开机':'用户软件关机')};
+    $('modeAuto').onclick=()=>{state.mode='auto';advance(1,'切换为自动模式')};
+    $('modeManual').onclick=()=>{state.mode='manual';state.powered=true;state.target=clampTarget(+$('manualBrightness').value);advance(1,'切换为手动模式')};
+    $('lux').oninput=e=>{$('luxValue').textContent=`${e.target.value} lux`;state.lux=+e.target.value;advance(1,'环境照度变化')};
+    $('presence').onchange=e=>{state.presence=e.target.value;advance(1,e.target.value==='present'?'检测到人员返回':'检测到人员离开')};
+    $('manualBrightness').oninput=e=>{$('manualValue').textContent=`${e.target.value}%`;if(state.mode==='manual'){state.target=clampTarget(+e.target.value);advance(1,'用户调节手动亮度')}};
+    $('bhFault').onchange=e=>{state.bhFault=e.target.checked;advance(1,e.target.checked?'BH1750 通信故障':'BH1750 恢复通信')};
+    $('radarFault').onchange=e=>{state.radarFault=e.target.checked;advance(1,e.target.checked?'LD2410 通信故障':'LD2410 恢复通信')};
+    $('advance1').onclick=()=>advance(1,'虚拟时间推进 1 秒');$('advance120').onclick=()=>advance(120,'虚拟时间快进 120 秒');
+    $('triggerAlarm').onclick=()=>{if(state.alarm){stopAlarm();return}state.alarm=true;state.alarmPhase=0;record('闹钟到点，开始呼吸提醒');render('闹钟呼吸提醒');animTimer=setInterval(()=>{state.alarmPhase=state.alarmPhase?0:1;advance(1,'闹钟呼吸提醒')},1000)};
+    $('reset').onclick=()=>{clearInterval(animTimer);Object.assign(state,{time:0,powered:false,mode:'auto',lux:100,presence:'present',bhFault:false,radarFault:false,dark:true,target:0,actual:0,vacancyStart:null,alarm:false,alarmPhase:0,lastSummary:'',logs:[]});$('lux').value=100;$('luxValue').textContent='100 lux';$('presence').value='present';$('manualBrightness').value=50;$('manualValue').textContent='50%';$('bhFault').checked=false;$('radarFault').checked=false;render('等待开机')};
+    render('等待开机');
+  </script>
+</body>
+</html>
