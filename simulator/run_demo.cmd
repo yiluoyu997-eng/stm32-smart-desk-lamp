@@ -1,18 +1,18 @@
 @echo off
-setlocal
+setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0"
 set "PYTHONIOENCODING=utf-8"
 
-where py >nul 2>nul
-if %ERRORLEVEL% EQU 0 (
+py -3 --version >nul 2>nul
+if not errorlevel 1 (
     py -3 run_demo.py
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 )
 
-where python >nul 2>nul
-if %ERRORLEVEL% EQU 0 (
+python --version >nul 2>nul
+if not errorlevel 1 (
     python run_demo.py
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 )
 
 echo [ERROR] Python 3 was not found. Install Python 3 and add it to PATH.
