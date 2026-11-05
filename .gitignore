@@ -21,10 +21,16 @@ temp/
 output/
 outputs/
 build/
+firmware/STM32F411RE/MDK-ARM/STM32F4xx-Nucleo/
 dist/
 *.log
 *.bak
 *.tmp
+*.o
+*.lst
+*.uvoptx
+DebugConfig/
+RTE/
 *.zip
 *.7z
 *.rar
